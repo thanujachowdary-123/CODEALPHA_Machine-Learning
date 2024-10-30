@@ -1,0 +1,49 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import cross_val_score
+
+# Load data
+data = pd.read_csv("credit_data.csv")  # Replace with your dataset
+
+# Preprocessing
+# Handle missing values
+data.fillna(data.mean(), inplace=True)
+
+# Encoding categorical variables
+label_encoder = LabelEncoder()
+data['employment_status'] = label_encoder.fit_transform(data['employment_status'])  # Example categorical column
+
+# Splitting features and target variable
+X = data.drop("credit_risk", axis=1)  # Replace with your target column
+y = data["credit_risk"]
+
+# Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Model Training
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Model Evaluation
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+# Cross-validation for further validation
+cv_scores = cross_val_score(model, X, y, cv=5)
+
+# Results
+print("Accuracy:", accuracy)
+print("Confusion Matrix:\n", conf_matrix)
+print("Classification Report:\n", class_report)
+print("Cross-validation Scores:", cv_scores)
+print("Average CV Score:", cv_scores.mean())
